@@ -1,0 +1,32 @@
+//    ps->setCookieJar(new QNetworkCookieJar);
+
+//    QNetworkCookieJar *cookie=ps->cookieJar();
+//    QList<QNetworkCookie> cookies=cookie->cookiesForUrl(url1);
+//    qDebug()<<cookie->setCookiesFromUrl(cookies,url2);
+
+//    QByteArray xsrf="XSRF-TOKEN="+cookies[0].value()+"; ";
+//    QByteArray session="sharesansar_session="+cookies[1].value();
+
+//    QUrlQuery params;
+//    params.addQueryItem("_token", ts);
+//    params.addQueryItem("companyid", ts2);
+//    QByteArray postData=params.query().toUtf8();
+//    qDebug()<<postData;
+
+QNetworkRequest req2(url2);
+//    req2.setHeader(QNetworkRequest::ContentTypeHeader, "text/html; charset=UTF-8");
+//    req2.setRawHeader("Accept", "");
+//    req2.setRawHeader("Accept-Encoding", "gzip, deflate, br");
+//    req2.setRawHeader("Accept-Language", "en-US,en;q=0.9");
+//    req2.setRawHeader("Connection", "keep-alive");
+//    req2.setRawHeader("Cookie", "_ga=GA1.2.1992680831.1601832245; __gads=ID=b0da54622354a879-2280daa468c40045:T=1603766522:RT=1603766522:S=ALNI_MYmLuxVbKe8g2pH6wrLKgs58wkD8g; __cfduid=dadacee1f8066ea9d244f86c5ecc8fc0c1605532389; "+xsrf+session);
+//    req2.setRawHeader("Host", "www.sharesansar.com");
+//    req2.setRawHeader("Referer", "https://www.sharesansar.com/company/nica");
+//    req2.setRawHeader("Sec-Fetch-Dest", "empty");
+//    req2.setRawHeader("Sec-Fetch-Mode", "cors");
+//    req2.setRawHeader("Sec-Fetch-Site", "same-origin");
+//    req2.setRawHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36 OPR/72.0.3815.320");
+req2.setRawHeader("X-Requested-With", "XMLHttpRequest");
+
+//    qDebug()<<cookie->setCookiesFromUrl(cookies,url2);
+//    ps->setCookieJar(cookie);

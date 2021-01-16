@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/new/qnetworkcomments">
+        <file>qnetwork_info.txt</file>
+    </qresource>
+</RCC>
