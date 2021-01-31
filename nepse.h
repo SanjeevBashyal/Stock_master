@@ -22,6 +22,7 @@ public:
     int snatch_from_merolagani();
     int snatch_todays_price();
     int snatch_from_sharesansar();
+    int snatch_sharesansar_id();
     int snatch_demand_supply();
     int snatch_events(int);
     int snatch_reports(int);

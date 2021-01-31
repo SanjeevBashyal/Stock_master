@@ -42,15 +42,20 @@ private slots:
 
     void on_line_news_returnPressed();
 
+    void on_line_reports_returnPressed();
+
     void on_push_qr_clicked();
 
     void on_push_news_enlarge_clicked();
+
+    void on_push_reports_enlarge_clicked();
 
     void on_push_bd_clicked();
 
     void on_push_ts_clicked();
 
     void on_push_ss_clicked();
+
     void on_push_nse_clicked();
 
 public:

@@ -71,6 +71,9 @@ bool Html::get_and_save(QByteArray text,int iden, QString id)
     else if(iden==2){
 
     }
+    else if(iden==11){
+        return this->save_sharesansar_id(text,id);
+    }
     return false;
 }
 
@@ -444,40 +447,94 @@ bool Html::save_sharesansar(QByteArray text, QString symbol)
     return false;
 }
 
+bool Html::save_sharesansar_id(QByteArray text, QString symbol)
+{
+    QList<QStringList> sector=this->db.to_list(this->db.query_select(QString("select Sector from Stock where Symbol='%1'").arg(symbol)));
+    QRegExp re2("<div id=\"companyid\" style=\"display: none;\">(.+)</div>");
+
+    re2.setMinimal(true);
+
+    int pos2 = re2.indexIn(text);Q_UNUSED(pos2);
+
+    if (pos2==-1){
+        return false;
+    }
+
+    QString ts2=re2.cap(1);
+
+    QSqlQuery qry(this->db3.db);
+    qry.prepare("insert into sharesansar_companyid values(?,?,?)");
+    qry.addBindValue(symbol);
+    qry.addBindValue(sector[0][0]);
+    qry.addBindValue(ts2.toInt());
+    return qry.exec();
+
+}
+
 bool Html::show_events(QByteArray text, int iden, QString symbol)
 {
-    int val=-1;
-    QString table=this->get_table(text,1);
+    text.insert(0,'[');
+    text.insert(text.size(),']');
+    QJsonParseError parse_error;
 
-    if(iden==50){
-        this->mw->text_news->append("<br>");
-        this->mw->text_news->append("<h3>"+symbol+"</h3>");
-        this->mw->text_news->append(table);
+    //read and parse from file
+    QJsonDocument doc = QJsonDocument::fromJson(text,
+                                               &parse_error);
+
+    //check parsing errors
+    if (parse_error.error != QJsonParseError::NoError) {
+        qDebug() << "Parsing error:" << parse_error.errorString();
+        return 1;
+    }
+
+    QJsonArray data = doc.array().at(0)["data"].toArray();
+    qDebug()<<symbol << text;
+
+    int val=-1;
+
+    if(iden==700){
+        QString final_table="<br><br>";
+        final_table.append("<h3>"+symbol+"</h3>");
+        final_table.append("<table><tbody>");
+        for(int j=0;j<data.size();j++){
+            final_table.append("<tr>");
+            final_table.append("<td>"+data.at(j)["published_date"].toString()+"</td>");
+            final_table.append("<td>"+data.at(j)["title"].toString()+"</td>");
+            final_table.append("</tr><br>");
+        }
+
+        final_table.append("</tbody></table>");
+        this->mw->text_news->append(final_table);
         return true;
     }
-    else if(iden==500){
+    else if(iden==70){
         val=-3;
     }
 //    qDebug()<<symbol;
     QString y_day=this->date.addDays(val).toString("yyyy-MM-dd");
 
-    QRegExp re("<tr>.+<td>(.+)</td>.+<td>.+<a.+</tr>");
-    re.setMinimal(true);
-
     int pos=0,count=0;
 
-    while((pos=re.indexIn(text,pos+1))!=-1){
-        QString d=re.cap(1);
-//        qDebug()<<d;
+    for(int i=0;i<data.size();i++){
+        QString d=data.at(i)["published_date"].toString();
+        pos=i;
         if(d.compare(y_day)<0){
             break;
         }
         count++;
     }
     if (count){
-        this->mw->text_news->append("<br>");
-        this->mw->text_news->append("<h3>"+symbol+"</h3>");
-        QString final_table=table.mid(0,pos)+"</tbody></table>";
+        QString final_table="<br><br>";
+        final_table.append("<h3>"+symbol+"</h3>");
+        final_table.append("<table><tbody>");
+        for(int j=0;j<pos;j++){
+            final_table.append("<tr>");
+            final_table.append("<td>"+data.at(j)["published_date"].toString()+"</td>");
+            final_table.append("<td>"+data.at(j)["title"].toString()+"</td>");
+            final_table.append("</tr><br>");
+        }
+
+        final_table.append("</tbody></table>");
         this->mw->text_news->append(final_table);
     }
 
@@ -491,7 +548,6 @@ bool Html::show_reports(QByteArray text, int iden, QString symbol)
 {
     text.insert(0,'[');
     text.insert(text.size(),']');
-
     QJsonParseError parse_error;
 
     //read and parse from file
@@ -504,39 +560,82 @@ bool Html::show_reports(QByteArray text, int iden, QString symbol)
         return 1;
     }
 
-    QJsonArray documents = doc.array().at(0)["d"].toArray();
+    QJsonArray data = doc.array().at(0)["data"].toArray();
+//    qDebug()<<symbol << data << text;
 
-    QString y_day=this->date.addDays(-15).toString("yyyy-MM-dd");
+    int val=-1;
 
-    for(int i=0;i<documents.size();i++){
-        QString doc_date=documents.at(i)["UploadedDateString"].toString();
-        if(doc_date.size()==9){
-            doc_date.insert(8,'0');
+    if(iden==800){
+        QString final_table="<br><br>";
+        final_table.append("<h3>"+symbol+"</h3>");
+        final_table.append("<table><tbody>");
+        for(int j=0;j<data.size();j++){
+            final_table.append("<tr>");
+            final_table.append("<td>"+data.at(j)["published_date"].toString()+"</td>");
+            final_table.append("<td>"+data.at(j)["title"].toString()+"</td>");
+            final_table.append("</tr><br>");
         }
-        qDebug()<<doc_date;
-        if(doc_date.compare(y_day)<0){
+
+        final_table.append("</tbody></table>");
+        this->mw->text_reports->append(final_table);
+        return true;
+    }
+    else if(iden==80){
+        val=-3;
+    }
+//    qDebug()<<symbol;
+    QString y_day=this->date.addDays(val).toString("yyyy-MM-dd");
+
+    int pos=0,count=0;
+
+    for(int i=0;i<data.size();i++){
+        QString d=data.at(i)["published_date"].toString();
+        pos=i;
+        if(d.compare(y_day)<0){
             break;
         }
-        int row_count=this->mw->table_reports->rowCount();
-        this->mw->table_reports->insertRow(row_count+i);
-        this->mw->table_reports->setItem(row_count,0,new QTableWidgetItem(symbol));
-        this->mw->table_reports->setItem(row_count,1,new QTableWidgetItem(documents.at(i)["UploadedDateString"].toString()));
-        this->mw->table_reports->setItem(row_count,2,new QTableWidgetItem(documents.at(i)["FiscalYearName"].toString()));
-        this->mw->table_reports->setItem(row_count,3,new QTableWidgetItem(documents.at(i)["CategoryName"].toString()));
-//        break;
+        count++;
+    }
+    if (count){
+        QString final_table="<br><br>";
+        final_table.append("<h3>"+symbol+"</h3>");
+        final_table.append("<table><tbody>");
+        for(int j=0;j<pos;j++){
+            final_table.append("<tr>");
+            final_table.append("<td>"+data.at(j)["published_date"].toString()+"</td>");
+            final_table.append("<td>"+data.at(j)["title"].toString()+"</td>");
+            final_table.append("</tr><br>");
+        }
+
+        final_table.append("</tbody></table>");
+        this->mw->text_reports->append(final_table);
     }
 
-    Q_UNUSED(iden);
-//    qDebug()<<text;
+
+
+//    qDebug()<<pos<<final_table;
     return true;
 }
 
 bool Html::save_dividends(QByteArray text, int iden, QString symbol)
 {
-//    qDebug()<<symbol;
+    text.insert(0,'[');
+    text.insert(text.size(),']');
+    QJsonParseError parse_error;
 
-//    int val=-1;
-    QString table=this->get_table(text,1);
+    //read and parse from file
+    QJsonDocument doc = QJsonDocument::fromJson(text,
+                                               &parse_error);
+
+    //check parsing errors
+    if (parse_error.error != QJsonParseError::NoError) {
+        qDebug() << "Parsing error:" << parse_error.errorString();
+        return 1;
+    }
+
+    QJsonArray data = doc.array().at(0)["data"].toArray();
+//    qDebug()<<symbol << data;
+
 
     if(iden==70){
         return true;
@@ -545,30 +644,27 @@ bool Html::save_dividends(QByteArray text, int iden, QString symbol)
 //        val=-3;
 //    }
 
-    QList<QStringList> data=this->beautify_table_parsed(this->parse_table(table));
-    if(data[1].size()<4){
-        return false;
-    }
+
 
     QList<QStringList> years=this->db.to_list(this->db.query_select(QString("select year from Insurance_Data where symbol='%1' order by year asc").arg(symbol)));
     int b_year=years[0][0].toInt();
 
     QSqlQuery qry(this->db.db);
-    qry.prepare(QString("update insurance_data set bonus=?,dividend=? where symbol='%1' and year=?").arg(symbol));
+    qry.prepare(QString("update insurance_data set bonus=?,dividend=? where symbol='%1' and year=? and quarter=4").arg(symbol));
     QStringList bonuses,dividends;
     QVariantList yrs;
     QString bonus,dividend;
-    for(int i=1;i<data.size();i++){
-        int year=data[i][6].mid(2,2).toInt();
+    for(int i=0;i<data.size();i++){
+        int year=data.at(i)["year"].toString().mid(2,2).toInt();
 //        qDebug()<<year<<b_year;
         if(year<b_year){
             break;
         }
-        bonus=data[i][1];
+        bonus=data.at(i)["bonus_share"].toString();
         if(bonus.isEmpty()==true){
             bonus="0.00";
         }
-        dividend=data[i][2];
+        dividend=data.at(i)["cash_dividend"].toString();
         if(dividend.isEmpty()==true){
             dividend="0.00";
         }
@@ -580,7 +676,7 @@ bool Html::save_dividends(QByteArray text, int iden, QString symbol)
     if(bonuses.size()==0){
         return false;
     }
-
+//    qDebug()<<bonuses<<dividends;
     qry.addBindValue(bonuses);
     qry.addBindValue(dividends);
     qry.addBindValue(yrs);

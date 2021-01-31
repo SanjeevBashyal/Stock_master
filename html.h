@@ -42,6 +42,7 @@ protected:
     bool save_merolagani(QByteArray,QString);
     bool save_todays_price(QList<QByteArray>);
     bool save_sharesansar(QByteArray,QString);
+    bool save_sharesansar_id(QByteArray,QString);
     bool show_events(QByteArray, int, QString);
     bool show_reports(QByteArray, int, QString);
     bool save_dividends(QByteArray, int, QString);

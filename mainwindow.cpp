@@ -28,14 +28,7 @@ bool MainWindow::set_req_ui(Ui::MainWindow * win)
 
 bool MainWindow::defaults()
 {
-    this->ui->table_reports->setColumnCount(4);
-//    this->ui->table_reports->setRowCount(1);
-    QStringList data;
-    data<<"Symbol"<<"Date"<<"Year"<<"Quarter";
-    for(int i=0;i<4;i++){
-        QTableWidgetItem *item=new QTableWidgetItem(data[i]);
-        this->ui->table_reports->setHorizontalHeaderItem(i,item);
-    }
+
     return true;
 }
 
@@ -82,10 +75,10 @@ void MainWindow::on_line_news_returnPressed()
         this->ns.snatch_events(7);
     }
     else if(text=="::"){
-        this->ns.snatch_events(700);
+        this->ns.snatch_events(70);
     }
     else if(text==":::"){
-        this->ns.snatch_events(70);
+        this->ns.snatch_events(700);
     }
     else if(text.isEmpty()==false){
         QList<QStringList> symbols=this->ns.rq.htm.db3.to_list(this->ns.rq.htm.db3.query_select(QString("select id from sharesansar_companyid where symbol='%1'").arg(text)));
@@ -94,16 +87,43 @@ void MainWindow::on_line_news_returnPressed()
             this->ui->text_news->append("Error");
         }
         else{
-            this->ns.rq.get_xhttp(QString("https://www.sharesansar.com/ajaxcompanynews?companyid=%1").arg(symbols[0][0]),50,text);
+            this->ns.rq.get_xhttp(QString("https://www.sharesansar.com/company-news?draw=1&start=0&length=10&company=%1").arg(symbols[0][0]),700,text);
 
         }
     }
 
 }
 
+void MainWindow::on_line_reports_returnPressed()
+{
+    this->ui->text_reports->clear();
+    QString text=this->ui->line_reports->text().toUpper();
+
+    if(text==":"){
+        this->ns.snatch_reports(8);
+    }
+    else if(text=="::"){
+        this->ns.snatch_reports(80);
+    }
+    else if(text==":::"){
+        this->ns.snatch_reports(800);
+    }
+    else if(text.isEmpty()==false){
+        QList<QStringList> symbols=this->ns.rq.htm.db3.to_list(this->ns.rq.htm.db3.query_select(QString("select id from sharesansar_companyid where symbol='%1'").arg(text)));
+        qDebug()<<symbols;
+        if(symbols.isEmpty()){
+            this->ui->text_reports->append("Error");
+        }
+        else{
+            this->ns.rq.get_xhttp(QString("https://www.sharesansar.com/company-announcement-category?draw=1&start=0&length=10&category=financial-analysis&company=%1").arg(symbols[0][0]),800,text);
+
+        }
+    }
+}
+
 void MainWindow::on_push_qr_clicked()
 {
-    this->ui->table_reports->clearContents();
+    this->ui->text_reports->clear();
     this->ns.snatch_reports(8);
 }
 
@@ -117,6 +137,14 @@ void MainWindow::on_push_news_enlarge_clicked()
 
 }
 
+void MainWindow::on_push_reports_enlarge_clicked()
+{
+    Dialog_text ts;
+    ts.set_text(this->ui->text_reports->toHtml());
+//    ts.show();
+    ts.exec();
+}
+
 void MainWindow::on_push_bd_clicked()
 {
     this->ui->text_update->append("BD: Running");
@@ -125,8 +153,7 @@ void MainWindow::on_push_bd_clicked()
 
 void MainWindow::on_push_ts_clicked()
 {
-    this->ns.calc_ros(0);
-//    this->ns.snatch_stock_price("RBCL","2016-00-15","2016-12-15");
+    this->ns.snatch_sharesansar_id();
 }
 
 

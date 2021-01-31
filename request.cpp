@@ -71,7 +71,7 @@ bool Request::get_collect(QUrl url,int pos, int iden)
     return true;
 }
 
-bool Request::get_syn_sharesansar(QUrl url1, QUrl url2)
+bool Request::get_syn_sharesansar(QUrl url1, QString symbol, QString sector)
 {
     QNetworkAccessManager *ps=new QNetworkAccessManager();
 
@@ -91,34 +91,23 @@ bool Request::get_syn_sharesansar(QUrl url1, QUrl url2)
 
 
     QByteArray bts = reply->readAll();
-//    QRegExp re("<meta name=\"_token\" content=\"(.+)\"(.+)>");
-    QRegExp re2("<input type=\"hidden\" name=\"companyid\" id=\"companyid\" value=\"(.+)\">");
+    QRegExp re2("<div id=\"companyid\" style=\"display: none;\">(.+)</div>");
 
-//    re.setMinimal(true);
     re2.setMinimal(true);
 
-//    int pos = re.indexIn(bts);Q_UNUSED(pos);
     int pos2 = re2.indexIn(bts);Q_UNUSED(pos2);
 
 //    QString ts=re.cap(1);
     QString ts2=re2.cap(1);
 
     QSqlQuery qry(this->db.db);
-    qry.prepare("insert into sharesansar_companyid values(?,?)");
-    qry.addBindValue(url2.toString());
+    qry.prepare("insert into sharesansar_companyid values(?,?,?)");
+    qry.addBindValue(symbol);
+    qry.addBindValue(sector);
     qry.addBindValue(ts2.toInt());
     qDebug()<<qry.exec();
 
-//    this->mw->text_news->append(ts);
-//    this->mw->text_news->append(ts2);
-
 /*
-
-    url2=url2.toString()+"?companyid=446";
-
-
-
-    qDebug()<<url2;
 
     QNetworkRequest req2(url2);
 //    req2.setHeader(QNetworkRequest::ContentTypeHeader, "text/html; charset=UTF-8");

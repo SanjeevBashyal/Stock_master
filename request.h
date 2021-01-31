@@ -25,7 +25,7 @@ public:
     bool get(QUrl);
     bool get(QUrl, int);
     bool get_collect(QUrl, int, int);
-    bool get_syn_sharesansar(QUrl, QUrl);
+    bool get_syn_sharesansar(QUrl, QString, QString);
 //    bool get_post(QUrl, QUrl);
     bool get(QUrl, int, int);
     bool get(QUrl, int, QString);

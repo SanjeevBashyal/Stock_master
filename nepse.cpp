@@ -72,6 +72,21 @@ int Nepse::snatch_from_sharesansar()
     return 0;
 }
 
+int Nepse::snatch_sharesansar_id()
+{
+    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock where Type='Equity'"));
+    QString url="https://www.sharesansar.com/company/";
+
+    QString qurl;
+    for(int i=0;i<symbols.size();i++){
+        qurl=url+symbols[i][0];
+        qDebug()<<qurl;
+        this->rq.get(QUrl(qurl),11,symbols[i][0]);
+//        break;
+    }
+    return 0;
+}
+
 int Nepse::snatch_demand_supply()
 {
     QString url="https://newweb.nepalstock.com/api/nots/nepse-data/supplydemand?all=true";
@@ -81,7 +96,7 @@ int Nepse::snatch_demand_supply()
 
 int Nepse::snatch_events(int iden)
 {
-    QString url="https://www.sharesansar.com/ajaxcompanynews?companyid=";
+    QString url="https://www.sharesansar.com/company-news?draw=1&start=0&length=10&company=";
     QList<QStringList> symbols=this->rq.htm.db3.to_list(this->rq.htm.db3.query_select("select symbol,id from sharesansar_companyid"));
     QString qurl;
     for(int i=0;i<symbols.size();i++){
@@ -95,14 +110,13 @@ int Nepse::snatch_events(int iden)
 
 int Nepse::snatch_reports(int iden)
 {
-    QString url="https://www.nepalipaisa.com/Modules/CompanyProfile/webservices/CompanyService.asmx/GetOnlyActiveDocuments";
-    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock where Type='Equity'"));
-    QStringList params,values;
-    params<<"cultureCode"<<"duration"<<"fiscalYear"<<"limit"<<"offset"<<"portalID"<<"companyCode";
-    values<<"en-US"<<""<<""<<"10"<<"1"<<"1"<<"";
+    QString url="https://www.sharesansar.com/company-announcement-category?draw=1&start=0&length=10&category=financial-analysis&company=";
+    QList<QStringList> symbols=this->rq.htm.db3.to_list(this->rq.htm.db3.query_select("select symbol,id from sharesansar_companyid"));
+    QString qurl;
     for(int i=0;i<symbols.size();i++){
-        values[6]=symbols[i][0];
-        this->rq.post_json(QUrl(url),params,values,iden,symbols[i][0]);
+        qurl=url+symbols[i][1];
+        qDebug()<<qurl;
+        this->rq.get_xhttp(QUrl(qurl),iden,symbols[i][0]);
 //        break;
     }
     return 0;
@@ -110,7 +124,7 @@ int Nepse::snatch_reports(int iden)
 
 int Nepse::snatch_dividends(int iden)
 {
-    QString url="https://www.sharesansar.com/ajaxcompanydividend?companyid=";
+    QString url="https://www.sharesansar.com/company-dividend?draw=1&start=0&length=10&company=";
     QList<QStringList> symbols=this->rq.htm.db3.to_list(this->rq.htm.db3.query_select("select symbol,id from sharesansar_companyid where Sector in ('Life Insurance','Non Life Insurance')"));
 
     QString qurl;

@@ -6,6 +6,7 @@ Dialog_text::Dialog_text(QWidget *parent) :
     ui(new Ui::Dialog_text)
 {
     ui->setupUi(this);
+    this->ui->text_enlarge->setOpenExternalLinks(true);
 }
 
 Dialog_text::~Dialog_text()

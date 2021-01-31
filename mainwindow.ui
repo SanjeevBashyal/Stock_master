@@ -520,12 +520,12 @@ p, li { white-space: pre-wrap; }
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QTableWidget" name="table_reports"/>
+         <widget class="QTextBrowser" name="text_reports"/>
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="1" column="0">
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="push_reports_enlarge">
             <property name="maximumSize">
              <size>
               <width>25</width>
@@ -551,7 +551,7 @@ p, li { white-space: pre-wrap; }
            </spacer>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="lineEdit">
+           <widget class="QLineEdit" name="line_reports">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
