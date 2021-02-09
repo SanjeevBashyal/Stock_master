@@ -5,15 +5,12 @@
 #include <QVector>
 #include <QUrl>
 #include <QtNetwork/QNetworkAccessManager>
-#include "ui_mainwindow.h"
 #include "html.h"
 
 class Request : public QObject
 {
     Q_OBJECT;
 
-public:
-    Database db;
 public:
     Html htm;
     int count;
@@ -25,8 +22,6 @@ public:
     bool get(QUrl);
     bool get(QUrl, int);
     bool get_collect(QUrl, int, int);
-    bool get_syn_sharesansar(QUrl, QString, QString);
-//    bool get_post(QUrl, QUrl);
     bool get(QUrl, int, int);
     bool get(QUrl, int, QString);
     bool get_xhttp(QUrl, int, QString);
@@ -42,8 +37,6 @@ public slots:
     void on_finished_collect(QNetworkReply *);
     void downloaded(QNetworkReply *);
 
-public:
-    Ui::MainWindow *mw=nullptr;
 
 };
 

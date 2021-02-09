@@ -21,14 +21,14 @@ MainWindow::~MainWindow()
 
 bool MainWindow::set_req_ui(Ui::MainWindow * win)
 {
-    this->ns.rq.mw=win;
+    this->ns.mw=win;
     this->ns.rq.htm.mw=win;
     return true;
 }
 
 bool MainWindow::defaults()
 {
-
+    this->ns.defaults();
     return true;
 }
 
@@ -153,7 +153,9 @@ void MainWindow::on_push_bd_clicked()
 
 void MainWindow::on_push_ts_clicked()
 {
-    this->ns.snatch_sharesansar_id();
+//    this->ns.snatch_sharesansar_id();
+    this->ns.snatch_quarterly_reports_all();
+
 }
 
 

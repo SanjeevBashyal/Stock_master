@@ -30,33 +30,33 @@ public slots:
 
 
 private slots:
-    void on_push_sss_clicked();
+    void on_push_sss_clicked();     //sharesansar_book_close_date
 
-    void on_push_tp_clicked();
+    void on_push_tp_clicked();      //todays_price
 
-    void on_push_ds_clicked();
+    void on_push_ds_clicked();      //demand_supply
 
-    void on_push_ml_clicked();
+    void on_push_ml_clicked();      //merolagani_snatcher
 
-    void on_push_ns_clicked();
+    void on_push_ns_clicked();      //news_snatcher_sharesansar
 
-    void on_line_news_returnPressed();
+    void on_line_news_returnPressed();      //news_snatching_tools
 
-    void on_line_reports_returnPressed();
+    void on_line_reports_returnPressed();   //reports_snatching_tools
 
-    void on_push_qr_clicked();
+    void on_push_qr_clicked();      //quarterly_reports_snatcher_sharesansar
 
-    void on_push_news_enlarge_clicked();
+    void on_push_news_enlarge_clicked();    //enlarge_news
 
-    void on_push_reports_enlarge_clicked();
+    void on_push_reports_enlarge_clicked(); //enlarge reports
 
-    void on_push_bd_clicked();
+    void on_push_bd_clicked();      //bonus_dividend_snatching_from_sharesansar
 
-    void on_push_ts_clicked();
+    void on_push_ts_clicked();      //test_function
 
-    void on_push_ss_clicked();
+    void on_push_ss_clicked();      //stock_snatcher_nepse
 
-    void on_push_nse_clicked();
+    void on_push_nse_clicked();     //Shares_outstanding_snatcher_NEPSE
 
 public:
     Ui::MainWindow *ui;

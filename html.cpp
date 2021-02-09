@@ -25,28 +25,27 @@ bool Html::get_and_save(QByteArray text, int iden, int id)
     }
 
     Q_UNUSED(id);
+    bool result=false;
 
-    if (iden==1){
-        return this->save_stocks(text);
+    if (iden==0){
+        result = this->show_nepse(text);
+    }
+    else if (iden==1){
+        result = this->save_stocks(text);
     }
     else if(iden==6){
-        return this->save_stock_shares(text,id);
+        result = this->save_stock_shares(text,id);
     }
     else if(iden==10){
-        return this->save_demand_supply(text);
+        result = this->save_demand_supply(text);
     }
-//    else if(iden==2){
-
-//    }
-//    else if(iden==2){
-
-//    }
-    return false;
+    this->mw->text_update->append(QString::number(iden)+": "+QVariant(result).toString());
+    return result;
 }
 
 bool Html::get_and_save(QByteArray text,int iden, QString id)
 {
-
+    bool result=false;
 
     QString a(text);
     if(a.isEmpty()){
@@ -54,42 +53,85 @@ bool Html::get_and_save(QByteArray text,int iden, QString id)
     }
 
     if(iden==4){
-        return this->save_merolagani(text,id);
+        result = this->save_merolagani(text,id);
     }
     else if(iden==5){
-        return this->save_sharesansar(text,id);
+        result = this->save_sharesansar(text,id);
     }
     else if(iden==7 || iden==70 || iden==700){
-        return this->show_events(text,iden,id);
+        result = this->show_events(text,iden,id);
     }
     else if(iden==8 || iden==80 || iden==800){
-        return this->show_reports(text,iden,id);
+        result = this->show_reports(text,iden,id);
     }
     else if(iden==9 || iden==90 || iden==900){
-        return this->save_dividends(text,iden,id);
+        result = this->save_dividends(text,iden,id);
     }
     else if(iden==2){
 
     }
     else if(iden==11){
-        return this->save_sharesansar_id(text,id);
+        result = this->save_sharesansar_id(text,id);
     }
-    return false;
+    else if(iden==25){
+        result = this->save_sharesansar_quarterly_reports(text,id);
+    }
+    this->mw->text_update->append(QString::number(iden)+": "+QVariant(result).toString());
+    return result;
 }
 
 bool Html::get_and_save(QList<QByteArray> texts,int iden, int size)
 {
-
     Q_UNUSED(size);
+
+    bool result=false;
+
     if(iden==3){
         return this->save_todays_price(texts);
     }
-//    else if(iden==2){
-//        this->save_sharesansar(text,id);
-//    }
 
-    return false;
+    return result;
 }
+
+bool Html::show_nepse(QByteArray text)
+{
+    QJsonParseError parse_error;
+
+    //read and parse from file
+    QJsonDocument doc = QJsonDocument::fromJson(text,
+                                               &parse_error);
+
+    //check parsing errors
+    if (parse_error.error != QJsonParseError::NoError) {
+        qDebug() << "Parsing error:" << parse_error.errorString();
+        return 1;
+    }
+
+    //this is top level arraya
+    QJsonArray indices = doc.array();
+    double np=indices.at(3)["change"].toDouble(0);
+    double ns=indices.at(2)["change"].toDouble(0);
+    QPalette qp1,qp2;
+    if(np>0){
+        qp1.setColor(QPalette::WindowText,Qt::green);
+    }else{
+        qp1.setColor(QPalette::WindowText,Qt::red);
+    }
+    if(ns>0){
+        qp2.setColor(QPalette::WindowText,Qt::green);
+    }else{
+        qp2.setColor(QPalette::WindowText,Qt::red);
+    }
+    this->mw->label_nepse_points->setText(QString::number(indices.at(3)["currentValue"].toDouble(0),'f',2));
+    this->mw->label_nepse_pchange->setText(QString::number(np,'f',2));
+    this->mw->label_nepse_pchange->setPalette(qp1);
+    this->mw->label_sensitive_points->setText(QString::number(indices.at(2)["currentValue"].toDouble(0),'f',2));
+    this->mw->label_sensitive_pchange->setText(QString::number(ns,'f',2));
+    this->mw->label_sensitive_pchange->setPalette(qp2);
+
+    return true;
+}
+
 
 
 bool Html::save_stocks(QByteArray text)
@@ -445,6 +487,98 @@ bool Html::save_sharesansar(QByteArray text, QString symbol)
         }
     }
     return false;
+}
+
+bool Html::save_sharesansar_quarterly_reports(QByteArray text, QString symbol)
+{
+    QList<QStringList> sectors=this->db.to_list(this->db.query_select(QString("select Sector from Stock where Symbol='%1'").arg(symbol)));
+    QString sector=sectors[0][0];
+    QString sector_copy=sectors[0][0];
+    QString sector_modified=sector_copy.replace(" ","_");
+
+    QList<QStringList> hashs=this->db3.to_list(this->db3.query_select(QString("select hash, thousands from Sharesansar_table_hash where sector='%1'").arg(sector)));
+    QString hash=hashs[0][0];
+    int count=hashs[0][1].toInt(0);
+
+    QList<QStringList> years=this->db.to_list(this->db.query_select(QString("select year,quarter from Quarterly_Reports where Symbol='%1'").arg(symbol)));
+    int year=years[0][0].toInt();
+    int quarter=years[0][1].toInt();
+
+    QRegularExpression reA("<tr>.+?<.+?>(.+?)</.+?>");
+    reA.setPatternOptions(QRegularExpression::DotMatchesEverythingOption);
+    QStringList phrases;
+    QRegularExpressionMatchIterator i = reA.globalMatch(QString(text));
+    while (i.hasNext()) {
+        QRegularExpressionMatch match = i.next();
+        QString td=match.captured(1);
+        phrases<<td;
+    }
+    QString phrase_data=phrases.join("\n");
+    QString sha256=QString(QCryptographicHash::hash(phrase_data.toUtf8(),QCryptographicHash::Sha256).toHex(0));
+
+    if(sha256.compare(hash)!=0){
+        this->mw->text_update->append(QString("Sharesansar Quarterly Report Table Updated: Couldn't Save Data for '%1'").arg(symbol));
+        return false;
+    }
+
+    QString initial=QString("insert into %1 ").arg(sector_modified);
+    QString final;
+    if(sector.compare("Commercial Banks")==0){
+        final=QString("values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+    }
+
+    QRegularExpression re("<th>(\\d)nd Quarter 20(\\d\\d).+?</th>");
+    QRegularExpressionMatch m=re.match(text);
+    bool flag=false;int q2=0,y2=0;
+    if(m.hasMatch()){
+        q2=m.captured(1).toInt(0);
+        y2=m.captured(2).toInt(0);
+        if(y2>year || (y2==year && q2>quarter)){
+            flag=true;
+        }
+    }
+    if(!flag){
+        this->mw->text_update->append(QString("Sharesansar Quarterly Report Table is upto date for '%1'").arg(symbol));
+        return false;
+    }
+
+    QSqlQuery qry(this->db.db);
+    qry.prepare(initial+final);
+    qry.addBindValue(symbol);
+    qry.addBindValue(y2);
+    qry.addBindValue(q2);
+
+    qDebug()<<q2<<y2;
+
+    QRegularExpression reB("<tr>\\s+<td.*?>.+?</td>\\s+<td.*?>(.+?)</td>\\s+</tr>");
+    reB.setPatternOptions(QRegularExpression::DotMatchesEverythingOption);
+    QStringList phrasesB;
+    QRegularExpressionMatchIterator j = reB.globalMatch(QString(text));
+    int counter=0;
+    while (j.hasNext()) {
+        QRegularExpressionMatch match = j.next();
+        QString td=match.captured(1).simplified();
+        td.replace(",","");
+        qDebug()<<td;
+        double data=td.toDouble(0);
+        if(counter<count){
+            data=data*1000;
+        }
+        qDebug()<<data;
+        qry.addBindValue(QString::number(data,'f',2));
+        counter++;
+    }
+
+    if(qry.exec()){
+        QSqlQuery qry2(this->db.db);
+        qry2.prepare(QString("update Quarterly_reports set year=?,quarter=? where symbol='%1'").arg(symbol));
+        qry2.addBindValue(y2);
+        qry2.addBindValue(q2);
+        return qry2.exec();
+    }
+    else{
+        return false;
+    }
 }
 
 bool Html::save_sharesansar_id(QByteArray text, QString symbol)

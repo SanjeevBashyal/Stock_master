@@ -9,6 +9,21 @@ Nepse::Nepse()
 
 }
 
+int Nepse::defaults()
+{
+    QString url="https://newweb.nepalstock.com/api/nots/nepse-index";
+    this->rq.get(url,0,-1);
+
+    int yr=this->date.mid(2,2).toInt();
+    int mn=this->date.mid(5,2).toInt();
+    int q[12]={2, 3, 3, 3, 4, 4, 4, 1, 1, 1, 2, 2};
+    int y[12]={0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1};
+    this->Quarter=q[mn-1];
+    this->Year=yr+56+y[mn-1];
+    qDebug()<<this->Year<<this->Quarter;
+    return 0;
+}
+
 int Nepse::snatch_stocks()
 {
     QString url="https://newweb.nepalstock.com/api/nots/company/list";
@@ -69,6 +84,29 @@ int Nepse::snatch_from_sharesansar()
         this->rq.get(QUrl(qurl),5,symbols[i][0]);
 //        break;
     }
+    return 0;
+}
+
+int Nepse::snatch_quarterly_reports_all()
+{
+    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select(QString("select symbol,year,quarter from quarterly_reports where sector='Commercial Banks'")));
+    for(int i=0;i<symbols.size();i++){
+        if(this->Year>symbols[i][1].toInt() || (this->Year==symbols[i][1].toInt() && (this->Quarter-1)>symbols[i][2].toInt())){
+            this->snatch_from_sharesansar_quarterly_reports(symbols[i][0]);
+        }else{
+            this->mw->text_update->append(QString("%1 is upto date.").arg(symbols[i][0]));
+        }
+    }
+    return 0;
+}
+
+int Nepse::snatch_from_sharesansar_quarterly_reports(QString symbol)
+{
+    QList<QStringList> symbols=this->rq.htm.db3.to_list(this->rq.htm.db3.query_select(QString("select id, symbol,sector from sharesansar_companyid where symbol='%1'").arg(symbol)));
+    QList<QStringList> sector=this->rq.htm.db3.to_list(this->rq.htm.db3.query_select(QString("select s_sector from sharesansar_sectors where sector='%1'").arg(symbols[0][2])));
+    QString url=QString("https://www.sharesansar.com/company-quarterly-report?company=%1&symbol=%2&sector=%3").arg(symbols[0][0],symbols[0][1],sector[0][0].replace(" ","%20"));
+
+    this->rq.get_xhttp(QUrl(url),25,symbol);
     return 0;
 }
 

@@ -7,6 +7,7 @@
 #include<QList>
 #include<QStringList>
 #include<QRegExp>
+#include<QCryptographicHash>
 #include "ui_mainwindow.h"
 
 class Html
@@ -37,11 +38,13 @@ public:
     QString get_text(QString,QString);
 
 protected:
+    bool show_nepse(QByteArray);
     bool save_stocks(QByteArray);
     bool save_stock_shares(QByteArray,int);
     bool save_merolagani(QByteArray,QString);
     bool save_todays_price(QList<QByteArray>);
     bool save_sharesansar(QByteArray,QString);
+    bool save_sharesansar_quarterly_reports(QByteArray,QString);
     bool save_sharesansar_id(QByteArray,QString);
     bool show_events(QByteArray, int, QString);
     bool show_reports(QByteArray, int, QString);
