@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     dialog_table.cpp \
     dialog_text.cpp \
+    fa_db.cpp \
     main.cpp \
     mainwindow.cpp \
     html.cpp \

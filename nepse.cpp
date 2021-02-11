@@ -1,8 +1,4 @@
 #include "nepse.h"
-#include <QString>
-#include<QUrlQuery>
-#include "request.h"
-#include "sqlite_database.h"
 
 Nepse::Nepse()
 {
@@ -87,9 +83,9 @@ int Nepse::snatch_from_sharesansar()
     return 0;
 }
 
-int Nepse::snatch_quarterly_reports_all()
+int Nepse::snatch_quarterly_reports_all(QString sector)
 {
-    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select(QString("select symbol,year,quarter from quarterly_reports where sector='Commercial Banks'")));
+    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select(QString("select symbol,year,quarter from quarterly_reports where sector='%1'").arg(sector)));
     for(int i=0;i<symbols.size();i++){
         if(this->Year>symbols[i][1].toInt() || (this->Year==symbols[i][1].toInt() && (this->Quarter-1)>symbols[i][2].toInt())){
             this->snatch_from_sharesansar_quarterly_reports(symbols[i][0]);
@@ -105,7 +101,7 @@ int Nepse::snatch_from_sharesansar_quarterly_reports(QString symbol)
     QList<QStringList> symbols=this->rq.htm.db3.to_list(this->rq.htm.db3.query_select(QString("select id, symbol,sector from sharesansar_companyid where symbol='%1'").arg(symbol)));
     QList<QStringList> sector=this->rq.htm.db3.to_list(this->rq.htm.db3.query_select(QString("select s_sector from sharesansar_sectors where sector='%1'").arg(symbols[0][2])));
     QString url=QString("https://www.sharesansar.com/company-quarterly-report?company=%1&symbol=%2&sector=%3").arg(symbols[0][0],symbols[0][1],sector[0][0].replace(" ","%20"));
-
+//    qDebug()<<url;
     this->rq.get_xhttp(QUrl(url),25,symbol);
     return 0;
 }

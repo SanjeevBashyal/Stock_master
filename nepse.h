@@ -6,6 +6,9 @@
 #include "nepse_calc.h"
 #include "ui_mainwindow.h"
 
+#include <QString>
+#include<QUrlQuery>
+
 
 class Nepse
 {
@@ -28,7 +31,7 @@ public:
     int snatch_from_merolagani();
     int snatch_todays_price();
     int snatch_from_sharesansar();
-    int snatch_quarterly_reports_all();
+    int snatch_quarterly_reports_all(QString);
     int snatch_from_sharesansar_quarterly_reports(QString);
     int snatch_sharesansar_id();
     int snatch_demand_supply();
@@ -40,6 +43,7 @@ public:
 public:
     int calc_roe(int);
     int calc_ros(int);
+    bool add_stocks_to_quarterly_reports();
     QList<QStringList> add_zero(QList<QStringList>);
 
 };
