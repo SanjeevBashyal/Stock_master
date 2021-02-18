@@ -31,6 +31,7 @@ public:
     int snatch_from_merolagani();
     int snatch_todays_price();
     int snatch_from_sharesansar();
+    int snatch_quarterly_reports_all_sectors();
     int snatch_quarterly_reports_all(QString);
     int snatch_from_sharesansar_quarterly_reports(QString);
     int snatch_sharesansar_id();

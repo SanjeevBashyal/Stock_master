@@ -154,8 +154,7 @@ void MainWindow::on_push_bd_clicked()
 void MainWindow::on_push_ts_clicked()
 {
 //    this->ns.snatch_sharesansar_id();
-    this->ns.snatch_quarterly_reports_all("Hotels");
-//    this->ns.add_stocks_to_quarterly_reports();
+    this->ns.snatch_quarterly_reports_all_sectors();
 
 }
 

@@ -83,6 +83,16 @@ int Nepse::snatch_from_sharesansar()
     return 0;
 }
 
+int Nepse::snatch_quarterly_reports_all_sectors()
+{
+    QStringList sectors;
+    sectors<<"Commercial Banks"<<"Development Banks"<<"Finance"<<"Microfinance"<<"Hydro Power"<<"Hotels"<<"Life Insurance"<<"Non Life Insurance";
+    for(int i=0;i<sectors.size();i++){
+        this->snatch_quarterly_reports_all(sectors[i]);
+    }
+    return 0;
+}
+
 int Nepse::snatch_quarterly_reports_all(QString sector)
 {
     QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select(QString("select symbol,year,quarter from quarterly_reports where sector='%1'").arg(sector)));
