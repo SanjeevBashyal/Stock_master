@@ -166,6 +166,12 @@ void MainWindow::on_push_ss_clicked()
     this->ns.snatch_stocks();
 }
 
+void MainWindow::on_push_pss_clicked()
+{
+    this->ui->text_update->append("PSS: Running");
+    this->ns.snatch_promoter_stocks();
+}
+
 void MainWindow::on_push_nse_clicked()
 {
     this->ui->text_update->append("NSE: Running");

@@ -33,6 +33,9 @@ bool Html::get_and_save(QByteArray text, int iden, int id)
     else if (iden==1){
         result = this->save_stocks(text);
     }
+    else if (iden==2){
+        result = this->save_promoter_stocks(text);
+    }
     else if(iden==6){
         result = this->save_stock_shares(text,id);
     }
@@ -66,9 +69,6 @@ bool Html::get_and_save(QByteArray text,int iden, QString id)
     }
     else if(iden==9 || iden==90 || iden==900){
         result = this->save_dividends(text,iden,id);
-    }
-    else if(iden==2){
-
     }
     else if(iden==11){
         result = this->save_sharesansar_id(text,id);
@@ -154,19 +154,86 @@ bool Html::save_stocks(QByteArray text)
     //this is array of country objects
 //    QJsonArray arr_companies = arr_doc[0].toArray();
 
+    QList<QStringList> symbols=this->db.to_list(this->db.query_select("select Symbol from Stock"));
+    QStringList symbols_only;
+    for(int i=0;i<symbols.size();i++){
+        symbols_only<<symbols[i][0];
+    }
+
     for(int i=0;i<arr_companies.size();i++){
-        if(arr_companies.at(i)["status"].toString()=="A"){
+        if(symbols_only.contains(arr_companies.at(i)["symbol"].toString())){
             QSqlQuery qry(this->db.db);
-            qry.prepare("insert into Stock (Symbol, Security, ID, Type, Sector) values(?,?,?,?,?)");
+            qry.prepare("update Stock set Status=? where Symbol=?");
+            qry.addBindValue(arr_companies.at(i)["status"].toString());
+            qry.addBindValue(arr_companies.at(i)["symbol"].toString());
+            qDebug()<<qry.exec();
+        }
+        else{
+            QSqlQuery qry(this->db.db);
+            qry.prepare("insert into Stock (Symbol, Security, ID, Status, Type, Sector) values(?,?,?,?,?,?)");
             qry.addBindValue(arr_companies.at(i)["symbol"].toString());
             qry.addBindValue(arr_companies.at(i)["securityName"].toString());
             qry.addBindValue(arr_companies.at(i)["id"].toInt(0));
+            qry.addBindValue(arr_companies.at(i)["status"].toString());
             qry.addBindValue(arr_companies.at(i)["instrumentType"].toString());
             qry.addBindValue(arr_companies.at(i)["sectorName"].toString());
-    //        qry.addBindValue(arr_companies.at(i)["regulatoryBody"].toString());
             qDebug()<<qry.exec();
         }
+    }
 
+    return true;
+
+}
+
+bool Html::save_promoter_stocks(QByteArray text)
+{
+    text.insert(0,'[');
+    text.insert(text.size(),']');
+
+
+    QJsonParseError parse_error;
+
+    //read and parse from file
+    QJsonDocument doc = QJsonDocument::fromJson(text,
+                                               &parse_error);
+
+    //check parsing errors
+    if (parse_error.error != QJsonParseError::NoError) {
+        qDebug() << "Parsing error:" << parse_error.errorString();
+        return 1;
+    }
+
+    //this is top level arraya
+    QJsonArray arr_doc = doc.array();
+
+    //this is array of country objects
+    QJsonArray arr_companies = arr_doc.at(0)["content"].toArray();
+
+    QList<QStringList> symbols=this->db.to_list(this->db.query_select("select Symbol from Stock"));
+    QStringList symbols_only;
+    for(int i=0;i<symbols.size();i++){
+        symbols_only<<symbols[i][0];
+    }
+
+    for(int i=0;i<arr_companies.size();i++){
+        if(symbols_only.contains(arr_companies.at(i)["symbol"].toString())){
+            QSqlQuery qry(this->db.db);
+            qry.prepare("update Stock set Status=? where Symbol=?");
+            qry.addBindValue(arr_companies.at(i)["activeStatus"].toString());
+            qry.addBindValue(arr_companies.at(i)["symbol"].toString());
+            qDebug()<<qry.exec();
+        }
+        else{
+            QSqlQuery qry(this->db.db);
+            qry.prepare("insert into Stock (Symbol, Security, ID, Status, Type, Sector) values(?,?,?,?,?,?)");
+            qry.addBindValue(arr_companies.at(i)["symbol"].toString());
+            qry.addBindValue(arr_companies.at(i)["securityName"].toString());
+            qry.addBindValue(arr_companies.at(i)["id"].toInt(0));
+            qry.addBindValue(arr_companies.at(i)["activeStatus"].toString());
+            qry.addBindValue("P_"+arr_companies.at(i)["instrumentType"]["description"].toString());
+            qry.addBindValue(arr_companies.at(i)["companyId"]["sectorMaster"]["sectorDescription"].toString());
+            qDebug()<<qry.exec();
+        }
     }
 
     return true;

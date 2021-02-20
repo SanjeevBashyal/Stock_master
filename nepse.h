@@ -27,6 +27,7 @@ public:
     Nepse();
     int defaults();
     int snatch_stocks();
+    int snatch_promoter_stocks();
     int snatch_stock_shares();
     int snatch_from_merolagani();
     int snatch_todays_price();

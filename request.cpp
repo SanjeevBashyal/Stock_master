@@ -264,7 +264,7 @@ void Request::on_finished_collect(QNetworkReply *req)
 {
     QVariant redirectionSignal = req->attribute(QNetworkRequest::HttpStatusCodeAttribute);
     QVariant qpos = req->property("position");
-    int pos;
+    int pos=0;
     if(qpos.isValid()){
         pos=qpos.toInt();
     }

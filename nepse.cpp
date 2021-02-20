@@ -27,6 +27,13 @@ int Nepse::snatch_stocks()
     return 0;
 }
 
+int Nepse::snatch_promoter_stocks()
+{
+    QString url="https://newweb.nepalstock.com/api/nots/security/promoters?size=500";
+    this->rq.get(url,2,-1);
+    return 0;
+}
+
 int Nepse::snatch_stock_shares()
 {
     QList<QStringList> ids=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select ID from Stock"));
@@ -41,7 +48,7 @@ int Nepse::snatch_stock_shares()
 
 int Nepse::snatch_from_merolagani()
 {
-    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock"));
+    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock where (Status='A' or Status='S')"));
     QString url="https://merolagani.com/CompanyDetail.aspx?symbol=";
     QString qurl;
     for(int i=0;i<symbols.size();i++){
@@ -70,7 +77,7 @@ int Nepse::snatch_todays_price()
 
 int Nepse::snatch_from_sharesansar()
 {
-    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock where Type='Equity'"));
+    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock where Type='Equity' and (Status='A' or Status='S')"));
     QString url="https://www.sharesansar.com/company/";
 
     QString qurl;
@@ -118,7 +125,7 @@ int Nepse::snatch_from_sharesansar_quarterly_reports(QString symbol)
 
 int Nepse::snatch_sharesansar_id()
 {
-    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock where Type='Equity'"));
+    QList<QStringList> symbols=this->rq.htm.db.to_list(this->rq.htm.db.query_select("select Symbol from Stock where Type='Equity' and (Status='A' or Status='S')"));
     QString url="https://www.sharesansar.com/company/";
 
     QString qurl;

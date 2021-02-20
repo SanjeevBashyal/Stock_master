@@ -40,6 +40,7 @@ public:
 protected:
     bool show_nepse(QByteArray);
     bool save_stocks(QByteArray);
+    bool save_promoter_stocks(QByteArray);
     bool save_stock_shares(QByteArray,int);
     bool save_merolagani(QByteArray,QString);
     bool save_todays_price(QList<QByteArray>);

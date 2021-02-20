@@ -56,6 +56,8 @@ private slots:
 
     void on_push_ss_clicked();      //stock_snatcher_nepse
 
+    void on_push_pss_clicked();      //promoter_stock_snatcher_nepse
+
     void on_push_nse_clicked();     //Shares_outstanding_snatcher_NEPSE
 
 public:
